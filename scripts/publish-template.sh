@@ -8,9 +8,13 @@
 # Before the YES prompt: local verification and local git preparation only
 # (init, .gitignore, branch, staging). No commit, no repo creation, no push.
 #
-# Run it from inside the template directory:
+# Run it from inside the template directory (it reads TEMPLATE_VERSION,
+# AGENTS.md, etc. relative to the current directory, not relative to this
+# script's own location):
 #   cd /path/to/bulletproof-ai-project-template
-#   bash ~/publish-template.sh
+#   bash scripts/publish-template.sh
+# (a copy outside the repo, e.g. ~/publish-template.sh, also works — the
+# script only cares about the working directory it's run from)
 
 set -Eeuo pipefail
 
