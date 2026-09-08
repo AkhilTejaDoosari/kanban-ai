@@ -52,7 +52,10 @@ An agent may not change a phase's mode; see `AGENTS.md` §10.
 
 ### Phase 1 — Foundation: scaffold, auth, data layer
 
-**Status:** not started
+**Status:** in progress — scaffold, Clerk↔Supabase wiring, and manual Google
+sign-in are done and verified; blocked only on the cross-user RLS isolation
+test, which is written but skipped (no test JWTs configured yet). See success
+criteria below.
 
 **Execution mode:** GATED
 
@@ -78,9 +81,9 @@ A signed-in user (via Clerk, Google OAuth) hits an empty but real Next.js app ba
 
 **Success criteria**
 
-- [ ] A user can sign in with Google via Clerk and reach the app shell.
-- [ ] A second Supabase test user cannot read or write a row owned by the first user (verified by a test that attempts both a cross-user `SELECT` and a cross-user `INSERT`/`UPDATE`, and expects both to fail).
-- [ ] `bash scripts/validate.sh` runs lint, typecheck, test, and build and all configured checks pass.
+- [x] A user can sign in with Google via Clerk and reach the app shell. (Manually verified 2026-09-08.)
+- [ ] A second Supabase test user cannot read or write a row owned by the first user (verified by a test that attempts both a cross-user `SELECT` and a cross-user `INSERT`/`UPDATE`, and expects both to fail). — test exists (`src/lib/supabase/projects-rls.integration.test.ts`) but is skipped: needs `SUPABASE_TEST_*` env vars and two real Clerk session JWTs.
+- [x] `bash scripts/validate.sh` runs lint, typecheck, test, and build and all configured checks pass. (Verified 2026-09-08: 4/4 checks passed.)
 
 **Documents to update on completion**
 
