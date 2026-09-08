@@ -233,7 +233,7 @@ A project-scoped AI chat panel that can propose board changes (create/move/updat
 
 ### Phase 6 — Testing and hardening
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** AUTONOMOUS
 
@@ -256,10 +256,13 @@ The core flows are covered by automated tests, and error handling matches the AG
 
 **Success criteria**
 
-- [ ] `npm test` and the Playwright suite both pass in CI-equivalent local run.
-- [ ] No user-facing error message in the audited surfaces exposes a stack trace, raw query, or internal file path.
-- [ ] `bash scripts/validate.sh` passes with all four checks configured and green.
+- [x] `npm test` and the Playwright suite both pass in CI-equivalent local run. (Verified 2026-09-08: `npm test` — 105 tests passed, 11 skipped (gated integration tests), 0 failed. `npm run test:e2e` — 6/6 passed twice in a row against the real dev server, real Supabase project, real Clerk sign-in (Testing Token bypass — no real Google OAuth), and real Groq API: sign-in reaches the projects page, create-project opens a board, dragging a card between columns persists after reload, and the assistant proposes a move as a preview that is confirmed into exactly that move. Each E2E spec creates and deletes its own project, so the real account this ran against was left clean.)
+- [x] No user-facing error message in the audited surfaces exposes a stack trace, raw query, or internal file path. (Audited 2026-09-08: every `throw new Error(...)` in `src/lib/supabase/*.ts` and `src/app/actions/*.ts` uses a fixed generic message — "Could not load cards.", "Could not get a suggestion.", etc. — never the underlying Supabase/Groq error. Both `src/app/error.tsx` and `src/app/projects/[id]/error.tsx` render fixed copy and never read `error.message`. No changes were needed.)
+- [x] `bash scripts/validate.sh` passes with all four checks configured and green. (Verified 2026-09-08: lint, typecheck, test, build all PASS — "VALIDATION PASSED (4 checks)".)
+
+Building and running the real E2E suite (not just writing it) surfaced a genuine bug no mocked unit test could see: confirming an AI-proposed move wrote to the database correctly but never updated the on-screen board (`Board` and `AssistantPanel` are sibling components with independent state and no sync path). Fixed by having the assistant panel call `router.refresh()` after a confirmed mutation and having `Board` resync its state from props when they change — see the `fix:` commit on this phase's branch for detail, and `AGENTS.md` §5/§8 on why this is exactly what Phase 6 is for.
 
 **Documents to update on completion**
 
-- `README.md` (how to run the test suites)
+- `README.md` (how to run the test suites) — done
+- `docs/DECISIONS.md` — ADR-010 (E2E testing strategy: Clerk Testing Token bypass, real Groq calls, kept out of `validate.sh`)
