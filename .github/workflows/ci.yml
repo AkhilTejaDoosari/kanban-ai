@@ -1,0 +1,41 @@
+name: CI
+
+# scripts/validate.sh is this project's single validation entrypoint
+# (AGENTS.md §9) -- lint/typecheck/test/build commands live there and
+# nowhere else, including here.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.20.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # No Clerk/Supabase/Groq/E2E secrets are set here on purpose:
+      # - lint/typecheck/build need none of them (verified locally with
+      #   .env.local absent -- every route is server-rendered on demand,
+      #   nothing touches Clerk/Supabase/Groq at build time).
+      # - The cross-user RLS integration tests and the Playwright E2E
+      #   suite (npm run test:e2e, not part of validate.sh) are gated on
+      #   SUPABASE_TEST_*/E2E_CLERK_USER_EMAIL and skip themselves with a
+      #   clear reason when those are unset -- see .env.example and
+      #   docs/DECISIONS.md ADR-010.
+      - name: Validate
+        run: bash scripts/validate.sh
