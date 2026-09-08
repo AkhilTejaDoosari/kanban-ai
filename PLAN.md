@@ -220,10 +220,10 @@ A project-scoped AI chat panel that can propose board changes (create/move/updat
 
 **Success criteria**
 
-- [ ] Asking the assistant to move/create/edit a card produces a preview, not an immediate change.
-- [ ] Confirming the preview performs exactly the previewed mutation; rejecting performs none.
-- [ ] The assistant cannot be prompted into affecting a project it wasn't scoped to (tested).
-- [ ] `bash scripts/validate.sh` passes.
+- [x] Asking the assistant to move/create/edit a card produces a preview, not an immediate change. (Verified 2026-09-08: `src/components/assistant/assistant-panel.test.tsx` — "shows a preview with Confirm/Reject instead of changing the board".)
+- [x] Confirming the preview performs exactly the previewed mutation; rejecting performs none. (Verified 2026-09-08: `assistant-panel.test.tsx` — "confirm executes the previewed mutation; reject executes nothing" and "reject performs no mutation".)
+- [x] The assistant cannot be prompted into affecting a project it wasn't scoped to (tested). (Verified 2026-09-08: `src/app/actions/assistant.test.ts` — "drops tool calls referencing cards outside the project" and "ignores a tool call smuggled in for another project"; scope enforced via `validateProposalInput` in `src/lib/assistant/tools.ts`.)
+- [x] `bash scripts/validate.sh` passes. (Verified 2026-09-08: 4/4 checks passed — lint, typecheck, 103 tests passed (11 skipped), build.)
 
 **Documents to update on completion**
 
