@@ -378,3 +378,68 @@ phase must add the table, RLS read+write policies, and cross-user tests per
 ADR-003 before storing anything.
 
 ---
+
+## ADR-010 — Playwright E2E: Clerk Testing Token bypass, real Groq calls, kept out of validate.sh
+
+**Date:** 2026-09-08
+**Status:** accepted
+
+**Context**
+
+Phase 6 required a Playwright suite covering sign-in, create-project, move-a-card,
+and AI-propose-confirm end to end. Three implementation choices needed deciding
+up front:
+
+1. How to authenticate. The app's only sign-in method is Clerk's hosted Google
+   OAuth (`<SignInButton />`, no `/sign-in` route of our own) — driving a real
+   Google consent screen from an automated browser is unreliable and would
+   require storing a real Google account password in test config.
+2. Whether the AI-propose-confirm spec should hit the real Groq API or a
+   mocked one. `askAssistantAction` (ADR-009) calls Groq server-side from a
+   Next.js Server Action, so Playwright's `page.route` (which only intercepts
+   requests made by the browser page) can't intercept it — mocking would
+   require a separate network-layer or module-mocking harness with no current
+   second consumer.
+3. Whether the E2E suite becomes a 5th `scripts/validate.sh` check.
+
+**Decision**
+
+1. Auth: `@clerk/testing/playwright`'s `clerk.signIn({ page, emailAddress })`,
+   run once in `e2e/global.setup.ts` and reused via `storageState`. This
+   creates a server-side session token through Clerk's Backend API and
+   bypasses the OAuth flow entirely — no real Google credentials are ever
+   touched. Requires `CLERK_SECRET_KEY` (already configured) and a new
+   `E2E_CLERK_USER_EMAIL` (an existing signed-up user's email in the Clerk
+   instance). The suite skips itself with a clear reason when
+   `E2E_CLERK_USER_EMAIL` is unset — the same pattern the RLS integration
+   tests already use for `SUPABASE_TEST_*`.
+2. AI spec: calls the real Groq API with a directive one-shot prompt
+   ("Move the card titled "X" to Done.") and asserts on the resulting
+   preview/board state, not on exact model wording. No mock.
+3. `scripts/validate.sh` stays at 4 checks (lint, typecheck, `vitest`,
+   build). `npm run test:e2e` is a separate, explicitly-invoked command — it
+   needs a real dev server, a real Clerk test user, and a real Groq call, none
+   of which belong in the fast, always-green gate every other check runs
+   through.
+
+**Alternatives considered**
+
+- Automating the real Google OAuth consent screen — rejected: brittle (bot
+  detection, changing consent UI), and would require a real account password
+  in test config.
+- Mocking Groq at the Next.js Server Action boundary (e.g. a test-only env
+  flag short-circuiting `askAssistantAction`) — rejected for v1: adds a
+  test-only code path to production source for a single spec's benefit.
+- Adding `npm run test:e2e` as a 5th `validate.sh` step — rejected: would make
+  every `validate.sh` run (including CI, pre-commit) depend on a live dev
+  server, a real signed-up Clerk user, and Groq availability/latency.
+
+**Consequences**
+
+The E2E suite mutates real data in whatever Supabase/Clerk project
+`E2E_CLERK_USER_EMAIL` points at (each spec creates and then deletes its own
+uniquely-named project to avoid leaving residue, but a failed run can leave
+one behind). `npm run test:e2e` must be run explicitly and locally/CI with
+real credentials — it is not part of the definition of a passing
+`scripts/validate.sh`. `docs/ARCHITECTURE.md` and `README.md` were updated in
+the same commit to describe both test suites.
