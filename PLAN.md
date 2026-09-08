@@ -126,7 +126,7 @@ A signed-in user can create, see, and switch between multiple isolated projects.
 
 ### Phase 3 — Kanban board core
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** GATED
 
@@ -139,7 +139,7 @@ Inside a project, a user has a working Kanban board: four columns, cards with ti
 **Deliverables**
 
 - `cards`, `labels`, `card_labels` tables with RLS policies (read and write) scoped through `project_id` ownership.
-- Board UI: To Do / In Progress / Done / Shipped columns using `@dnd-kit/react`, cross-container sortable drag-and-drop with position persisted on drop, optimistic UI with rollback on server rejection.
+- Board UI: To Do / In Progress / Test/Validate / Done columns using `@dnd-kit/react`, cross-container sortable drag-and-drop with position persisted on drop, optimistic UI with rollback on server rejection.
 - Card create/edit/delete UI covering all v1 fields (title, description, due date, priority, labels).
 
 **Capabilities needed**
@@ -150,9 +150,9 @@ Inside a project, a user has a working Kanban board: four columns, cards with ti
 
 **Success criteria**
 
-- [ ] A card can be created, edited, deleted, and dragged between all four columns, with the new position persisted after a page reload.
-- [ ] A user cannot read or write another user's project's cards/labels via direct API calls (tested, not just assumed from RLS).
-- [ ] `bash scripts/validate.sh` passes.
+- [x] A card can be created, edited, deleted, and dragged between all four columns, with the new position persisted after a page reload. (Manually verified 2026-09-08, including a real bug found and fixed in review: a stale `column_key` after optimistic cross-column moves was causing drags to revert on reload.)
+- [x] A user cannot read or write another user's project's cards/labels via direct API calls (tested, not just assumed from RLS). (Verified 2026-09-08: `src/lib/supabase/cards-labels-rls.integration.test.ts` run against the real `kanban-ai` Supabase project with two real Clerk session JWTs — 5/5 tests passed, covering cross-user read/insert/update on `cards`, read on `labels`, and insert on `card_labels`.)
+- [x] `bash scripts/validate.sh` passes. (Verified 2026-09-08: 4/4 checks passed, 70 tests.)
 
 **Documents to update on completion**
 

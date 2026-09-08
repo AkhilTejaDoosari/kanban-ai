@@ -199,3 +199,40 @@ both dark and light themes roughly doubles the states each component needs
 covering, versus a dark-only decision.
 
 ---
+
+## ADR-006 — Board columns: To Do / In Progress / Test/Validate / Done, not Shipped
+
+**Date:** 2026-09-08
+**Status:** accepted
+**Supersedes:** the column set in AGENTS.md §1 and PLAN.md Phase 3 as originally
+written ("To Do / In Progress / Done / Shipped")
+
+**Context**
+
+During Phase 3 manual testing, the project owner found "Shipped" as a 4th-column
+label confusing for a personal task tracker (it reads as a release/deploy concept,
+not something every project has) and asked for a testing/validation stage instead.
+
+**Decision**
+
+The board's 3rd and 4th columns change: the old 3rd column ("Done") becomes
+"Test/Validate" (`column_key = 'test_validate'`), and the old 4th column
+("Shipped") becomes the new "Done" (`column_key = 'done'`). To Do and In Progress
+are unchanged. Existing cards were remapped, not just relabeled, by
+`supabase/migrations/0003_rename_board_columns.sql`: old `done` rows moved to
+`test_validate`, old `shipped` rows moved to `done`.
+
+**Alternatives considered**
+
+- Keep "Shipped" and just rename the label — rejected: the project owner's request
+  was for a genuinely different 4-stage workflow (add a testing stage), not a
+  cosmetic rename.
+
+**Consequences**
+
+Any future migration, seed data, or documentation referencing the old
+`done`/`shipped` column keys is now wrong and must use `test_validate`/`done`.
+`AGENTS.md` §1, `PLAN.md` Phase 3, and `docs/ARCHITECTURE.md`'s data model section
+were updated in the same commit as the code and migration.
+
+---

@@ -13,7 +13,7 @@ capability is needed. It does not explain how to perform a capability.
 <!-- Populated during intake. Until then this project is UNCONFIGURED. -->
 
 - Name: Kanban AI (working name)
-- Purpose: A Kanban project management app where each user manages multiple isolated projects, each with its own To Do / In Progress / Done / Shipped board, plus a project-scoped AI assistant that can propose (and, on confirmation, execute) changes to that project's board.
+- Purpose: A Kanban project management app where each user manages multiple isolated projects, each with its own To Do / In Progress / Test/Validate / Done board, plus a project-scoped AI assistant that can propose (and, on confirmation, execute) changes to that project's board.
 - Users: Individual users juggling several concurrent projects who sign in with Google.
 - Stack: Next.js (App Router, current stable version — verify via current documentation at implementation time), Supabase Postgres with Row Level Security, Clerk (auth, Google OAuth, native Supabase third-party auth integration), `@dnd-kit/react` for drag-and-drop, Anthropic API (`@anthropic-ai/sdk`) for the AI assistant's tool-use loop.
 - Status: CONFIGURED

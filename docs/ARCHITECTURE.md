@@ -31,8 +31,8 @@ RLS-backed mutation paths as manual edits, after explicit confirmation.
 - `projects` — owned by a Clerk user id; the root of isolation. Everything else
   hangs off a `project_id`.
 - `cards` — belong to exactly one project; carry column (`todo` / `in_progress` /
-  `done` / `shipped`), title, description, due date, priority, and an ordering
-  position within their column.
+  `test_validate` / `done`), title, description, due date, priority, and an
+  ordering position within their column.
 - `labels` — belong to a project; `card_labels` joins cards to labels
   (many-to-many).
 
