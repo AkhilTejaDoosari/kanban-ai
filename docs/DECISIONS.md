@@ -236,3 +236,105 @@ Any future migration, seed data, or documentation referencing the old
 were updated in the same commit as the code and migration.
 
 ---
+
+## ADR-007 — Palette correction: text-muted, light-accent, light-success failed WCAG AA
+
+**Date:** 2026-09-08
+**Status:** accepted
+**Supersedes:** the exact hex values recorded for these roles in `docs/DESIGN.md`
+as of ADR-005
+
+**Context**
+
+`docs/DESIGN.md`'s non-negotiable is a 4.5:1 contrast floor for body text (3:1 for
+large text/UI), in both themes. Phase 4 computed actual WCAG contrast ratios for
+every text-role/surface pairing before building on top of them (rather than
+assuming the intake-time palette was correct), and found three failures:
+
+- `text muted` (`#6E7383`, identical in both themes) was only 3.56:1 against dark
+  `surface` and 4.45:1 against light `background` -- a single gray cannot clear
+  4.5:1 against both a near-black and a near-white surface at once, which is a
+  structural flaw, not a rounding error.
+- Light-theme `accent` (`#4C6FFF`) was 3.93-4.18:1 -- passes the 3:1 UI-component
+  floor but fails for body-sized text (e.g. a text link or a ghost-button label).
+- Light-theme `success` (`#16A34A`) was 3.10-3.30:1 -- fails even the 3:1 floor.
+
+**Decision**
+
+- `text muted` now differs per theme: `#848A9D` (dark), `#636776` (light) --
+  each independently verified >=4.5:1 against both `background` and `surface`
+  in its theme.
+- Light `accent` darkened to `#4464E5` (>=4.71:1 both surfaces).
+- Light `success` darkened to `#107A37` (>=5.12:1 both surfaces).
+- Dark-theme accent/success/warning/danger and light-theme warning/danger were
+  already compliant and are unchanged.
+
+**Alternatives considered**
+
+- Restrict the failing colors to large-text/decorative use only, keeping the
+  original hex values -- rejected: `text-muted` is used for due dates and
+  description previews at `text-xs`, which is small body text, not large text:
+  the actual usage needed to pass the body-text floor, not just the UI floor.
+
+**Consequences**
+
+`docs/DESIGN.md`'s palette tables and `src/app/globals.css` were updated in the
+same commit. Any future component using `text-muted`, or the light theme's
+`accent`/`success`, is now safe by default rather than needing a manual contrast
+check.
+
+---
+
+## ADR-008 — Livelier accent + curated label palette ("more joyful colours")
+
+**Date:** 2026-09-08
+**Status:** accepted
+**Refines, does not supersede:** ADR-005 (Deep Ink / Focused Dark stays the base
+identity: near-black canvas, restrained chrome, one accent used sparingly for
+UI state)
+
+**Context**
+
+After using Phase 3's board, the project owner found the interface visually flat
+and asked for "better joyful colours," explicitly invoking the `frontend-design`
+skill. Two scopes were offered: (a) stay dark-first but inject more joy within
+that identity, or (b) open a fresh direction mockup, like the original Phase-0
+brainstorm. The project owner chose (a) — the base identity from ADR-005 stays;
+only the color system gets richer.
+
+Two concrete gaps drove the "flat" feeling: every card's priority accent and
+every focus ring used the same fairly muted periwinkle-blue, and -- more
+significantly -- `createLabelAction`'s caller always passed the same hardcoded
+default color, so **every label a user ever created was visually identical**,
+regardless of name. A board with several labels looked monochrome no matter
+how much the user tried to categorize it with labels.
+
+**Decision**
+
+- Accent brightens from `#7C9CFF`/`#4464E5` (dark/light) to `#8B7FFF`/`#685FBF`
+  -- a livelier violet-indigo, still >=4.5:1 compliant in both themes (verified:
+  5.27-5.77:1 dark, 4.97-5.28:1 light).
+- New labels cycle through a curated 8-color palette (`LABEL_COLORS` in
+  `src/lib/board-constants.ts`) instead of one fixed default -- the color-picking
+  decision moved from `CardModal` (presentation) to `Board` (which knows how many
+  labels already exist, via `labels.length % LABEL_COLORS.length`). Every swatch
+  is independently verified >=4.5:1 against `#12141A` chip text.
+- Background, surface, border, and text-primary/muted are unchanged -- the calm
+  near-black canvas from ADR-005 stands.
+
+**Alternatives considered**
+
+- A full new visual direction (option b above) -- not chosen; the project owner
+  picked the narrower refinement.
+- Giving every label a random color -- rejected in favor of a fixed, curated,
+  contrast-verified rotation: predictable, accessible, and avoids two
+  low-contrast or visually-clashing colors landing next to each other.
+
+**Consequences**
+
+Any future palette addition (e.g. a 9th label color) must be independently
+contrast-checked against `#12141A` before joining `LABEL_COLORS`, the same way
+these eight were. `docs/DESIGN.md`'s palette tables and label-palette section
+were updated in the same commit.
+
+---

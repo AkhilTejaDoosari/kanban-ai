@@ -142,4 +142,50 @@ describe.skipIf(!configured)("cards/labels RLS isolation", () => {
 
     expect(error).not.toBeNull();
   });
+
+  it("blocks user B from deleting user A's card", async () => {
+    const asA = clientFor(userAToken!);
+    const asB = clientFor(userBToken!);
+
+    const { data: project } = await asA
+      .from("projects")
+      .insert({ name: "A's project for card delete RLS" })
+      .select()
+      .single();
+    const { data: card } = await asA
+      .from("cards")
+      .insert({ project_id: project!.id, column_key: "todo", title: "Do not delete" })
+      .select()
+      .single();
+
+    // deleteCard() (src/lib/supabase/cards.ts) filters only by id, no
+    // app-level ownership check -- this proves the EXISTS-join DELETE policy
+    // alone is sufficient: B's delete matches zero rows, silently, not an
+    // error.
+    await asB.from("cards").delete().eq("id", card!.id);
+
+    const { data: stillThere } = await asA.from("cards").select().eq("id", card!.id);
+    expect(stillThere).toHaveLength(1);
+  });
+
+  it("blocks user B from deleting user A's label", async () => {
+    const asA = clientFor(userAToken!);
+    const asB = clientFor(userBToken!);
+
+    const { data: project } = await asA
+      .from("projects")
+      .insert({ name: "A's project for label delete RLS" })
+      .select()
+      .single();
+    const { data: label } = await asA
+      .from("labels")
+      .insert({ project_id: project!.id, name: "Do not delete", color: "#f87171" })
+      .select()
+      .single();
+
+    await asB.from("labels").delete().eq("id", label!.id);
+
+    const { data: stillThere } = await asA.from("labels").select().eq("id", label!.id);
+    expect(stillThere).toHaveLength(1);
+  });
 });

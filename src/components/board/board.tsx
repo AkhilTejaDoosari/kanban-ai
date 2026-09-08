@@ -10,7 +10,7 @@ import {
   moveCardAction,
   updateCardAction,
 } from "@/app/actions/board";
-import { COLUMNS, type Column } from "@/lib/board-constants";
+import { COLUMNS, LABEL_COLORS, type Column } from "@/lib/board-constants";
 import type { Label } from "@/lib/supabase/labels";
 import { BoardColumn } from "./board-column";
 import { CardModal, type CardModalSubmit } from "./card-modal";
@@ -48,7 +48,8 @@ export function Board({
     setModal(null);
   }
 
-  async function handleCreateLabel(name: string, color: string) {
+  async function handleCreateLabel(name: string) {
+    const color = LABEL_COLORS[labels.length % LABEL_COLORS.length];
     const label = await createLabelAction({ projectId, name, color });
     setLabels((current) => [...current, label]);
   }

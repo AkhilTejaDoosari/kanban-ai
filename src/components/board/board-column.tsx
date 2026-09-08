@@ -42,21 +42,27 @@ export function BoardColumn({
           type="button"
           onClick={() => onAddCard(id)}
           aria-label={`Add card to ${title}`}
-          className="text-xs text-text-muted hover:text-text-primary"
+          className="rounded-lg px-1.5 py-0.5 text-xs text-text-muted hover:bg-surface hover:text-text-primary"
         >
           + Add card
         </button>
       </div>
       <div className="flex flex-col gap-2">
-        {cards.map((card, index) => (
-          <CardItem
-            key={card.id}
-            card={card}
-            index={index}
-            labels={labels}
-            onOpen={onOpenCard}
-          />
-        ))}
+        {cards.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-border p-3 text-center text-xs text-text-muted">
+            No cards yet
+          </p>
+        ) : (
+          cards.map((card, index) => (
+            <CardItem
+              key={card.id}
+              card={card}
+              index={index}
+              labels={labels}
+              onOpen={onOpenCard}
+            />
+          ))
+        )}
       </div>
     </div>
   );

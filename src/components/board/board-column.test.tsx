@@ -39,6 +39,40 @@ describe("BoardColumn", () => {
     expect(screen.getByText("Second")).toBeInTheDocument();
   });
 
+  it("shows an empty state when the column has no cards", () => {
+    render(
+      <DragDropProvider>
+        <BoardColumn
+          id="done"
+          title="Done"
+          cards={[]}
+          labels={[]}
+          onOpenCard={vi.fn()}
+          onAddCard={vi.fn()}
+        />
+      </DragDropProvider>,
+    );
+
+    expect(screen.getByText(/no cards yet/i)).toBeInTheDocument();
+  });
+
+  it("does not show the empty state once a card exists", () => {
+    render(
+      <DragDropProvider>
+        <BoardColumn
+          id="todo"
+          title="To Do"
+          cards={[card("c1", "First")]}
+          labels={[]}
+          onOpenCard={vi.fn()}
+          onAddCard={vi.fn()}
+        />
+      </DragDropProvider>,
+    );
+
+    expect(screen.queryByText(/no cards yet/i)).not.toBeInTheDocument();
+  });
+
   it("calls onAddCard with the column id when the add-card button is clicked", () => {
     const onAddCard = vi.fn();
     render(

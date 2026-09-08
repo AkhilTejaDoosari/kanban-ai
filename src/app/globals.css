@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
-/* Deep Ink / Focused Dark — see docs/DESIGN.md. Dark is the base theme; light is
-   derived and applied via prefers-color-scheme. Phase 4 adds a manual toggle. */
+/* Deep Ink / Focused Dark -- see docs/DESIGN.md. Dark is the base theme.
+   Light applies either via the OS preference (prefers-color-scheme) or via
+   an explicit user choice, stored as data-theme on <html> by ThemeToggle.
+   An explicit choice always wins over the OS preference. */
 :root {
   color-scheme: dark;
 
   --color-background: #12141a;
   --color-surface: #1a1d26;
   --color-text-primary: #f2f3f5;
-  --color-text-muted: #6e7383;
-  --color-accent: #7c9cff;
+  --color-text-muted: #848a9d;
+  --color-accent: #8b7fff;
   --color-border: #262a36;
   --color-success: #4ade80;
   --color-warning: #fbbf24;
@@ -17,19 +19,33 @@
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-theme="dark"]) {
     color-scheme: light;
 
     --color-background: #f7f8fa;
     --color-surface: #ffffff;
     --color-text-primary: #12141a;
-    --color-text-muted: #6e7383;
-    --color-accent: #4c6fff;
+    --color-text-muted: #636776;
+    --color-accent: #685fbf;
     --color-border: #e4e7ed;
-    --color-success: #16a34a;
+    --color-success: #107a37;
     --color-warning: #b45309;
     --color-danger: #dc2626;
   }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-background: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-text-primary: #12141a;
+  --color-text-muted: #636776;
+  --color-accent: #685fbf;
+  --color-border: #e4e7ed;
+  --color-success: #107a37;
+  --color-warning: #b45309;
+  --color-danger: #dc2626;
 }
 
 @theme inline {
@@ -49,4 +65,12 @@
 body {
   background: var(--color-background);
   color: var(--color-text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

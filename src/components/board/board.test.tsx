@@ -23,6 +23,7 @@ vi.mock("@/app/actions/board", () => ({
 }));
 
 import { Board } from "./board";
+import { LABEL_COLORS } from "@/lib/board-constants";
 import type { CardWithLabels } from "./types";
 
 const existingCard: CardWithLabels = {
@@ -181,6 +182,38 @@ describe("Board", () => {
     expect(await screen.findByLabelText("Urgent")).toBeInTheDocument();
   });
 
+  it("cycles through the label palette instead of reusing one color for every label", async () => {
+    const existingLabel = {
+      id: "l1",
+      project_id: "p1",
+      name: "Bug",
+      color: LABEL_COLORS[0],
+      created_at: "x",
+    };
+    createLabelAction.mockResolvedValue({
+      id: "l2",
+      project_id: "p1",
+      name: "Feature",
+      color: LABEL_COLORS[1],
+      created_at: "x",
+    });
+    const user = userEvent.setup();
+    render(
+      <Board projectId="p1" initialCards={[]} initialLabels={[existingLabel]} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /add card to to do/i }));
+    await user.type(screen.getByLabelText(/new label name/i), "Feature");
+    await user.click(screen.getByRole("button", { name: /add label/i }));
+
+    // one label already exists, so the next color is LABEL_COLORS[1], not [0]
+    expect(createLabelAction).toHaveBeenCalledWith({
+      projectId: "p1",
+      name: "Feature",
+      color: LABEL_COLORS[1],
+    });
+  });
+
   it("deletes a card via the modal's delete button and removes it without a reload", async () => {
     const user = userEvent.setup();
     render(
@@ -192,7 +225,8 @@ describe("Board", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /existing card/i }));
-    await user.click(screen.getByRole("button", { name: /delete/i }));
+    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+    await user.click(screen.getByRole("button", { name: /confirm delete/i }));
 
     expect(deleteCardAction).toHaveBeenCalledWith({ id: "c1", projectId: "p1" });
     expect(screen.queryByText("Existing card")).not.toBeInTheDocument();

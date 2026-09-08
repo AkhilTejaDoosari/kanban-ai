@@ -49,3 +49,9 @@ export async function insertProject(name: string): Promise<Project> {
   if (error) throw new Error("Could not create project.");
   return data;
 }
+
+export async function deleteProject(id: string): Promise<void> {
+  const supabase = createServerSupabaseClient();
+  const { error } = await supabase.from("projects").delete().eq("id", id);
+  if (error) throw new Error("Could not delete project.");
+}

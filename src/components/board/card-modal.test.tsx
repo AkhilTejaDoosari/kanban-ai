@@ -11,7 +11,7 @@ const labels: Label[] = [
 ];
 
 describe("CardModal label creation", () => {
-  it("calls onCreateLabel with the entered name and color, not onSubmit", async () => {
+  it("calls onCreateLabel with just the entered name (color is Board's job), not onSubmit", async () => {
     const onCreateLabel = vi.fn();
     const onSubmit = vi.fn();
     const user = userEvent.setup();
@@ -29,7 +29,7 @@ describe("CardModal label creation", () => {
     await user.type(screen.getByLabelText(/new label name/i), "Urgent");
     await user.click(screen.getByRole("button", { name: /add label/i }));
 
-    expect(onCreateLabel).toHaveBeenCalledWith("Urgent", expect.any(String));
+    expect(onCreateLabel).toHaveBeenCalledWith("Urgent");
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });
@@ -136,7 +136,7 @@ describe("CardModal (edit mode)", () => {
     );
   });
 
-  it("calls onDelete when the delete button is clicked", async () => {
+  it("does not delete on the first click -- it asks for confirmation first", async () => {
     const onDelete = vi.fn();
     const user = userEvent.setup();
     render(
@@ -150,7 +150,48 @@ describe("CardModal (edit mode)", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /delete/i }));
+    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(screen.getByText(/delete this card\?/i)).toBeInTheDocument();
+  });
+
+  it("deletes only after the confirm step", async () => {
+    const onDelete = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <CardModal
+        mode="edit"
+        card={card}
+        labels={labels}
+        onClose={vi.fn()}
+        onSubmit={vi.fn()}
+        onDelete={onDelete}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+    await user.click(screen.getByRole("button", { name: /confirm delete/i }));
     expect(onDelete).toHaveBeenCalledWith("c1");
+  });
+
+  it("backs out of the confirm step on cancel, without deleting", async () => {
+    const onDelete = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <CardModal
+        mode="edit"
+        card={card}
+        labels={labels}
+        onClose={vi.fn()}
+        onSubmit={vi.fn()}
+        onDelete={onDelete}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+    await user.click(screen.getByRole("button", { name: /^cancel$/i, hidden: false }));
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(screen.queryByText(/delete this card\?/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^delete$/i })).toBeInTheDocument();
   });
 });

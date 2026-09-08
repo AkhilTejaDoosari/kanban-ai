@@ -22,8 +22,8 @@ dashboard" look.
 | background | `#12141A` | app background |
 | surface | `#1A1D26` | cards, panels, columns |
 | text primary | `#F2F3F5` | |
-| text muted | `#6E7383` | labels, timestamps, secondary text |
-| accent | `#7C9CFF` | active states, focus rings, primary actions, AI panel accent |
+| text muted | `#848A9D` | labels, timestamps, secondary text (ADR-007: lightened from `#6E7383`, which failed 4.5:1 against `surface`) |
+| accent | `#8B7FFF` | active states, focus rings, primary actions, AI panel accent (ADR-008: brightened from `#7C9CFF` for a livelier feel) |
 | border | `#262A36` | column/card borders, dividers |
 | success | `#4ADE80` | |
 | warning | `#FBBF24` | |
@@ -36,15 +36,36 @@ dashboard" look.
 | background | `#F7F8FA` | |
 | surface | `#FFFFFF` | |
 | text primary | `#12141A` | |
-| text muted | `#6E7383` | |
-| accent | `#4C6FFF` | darkened from the dark-theme accent to hold contrast on white |
+| text muted | `#636776` | labels, timestamps, secondary text (ADR-007: darkened from `#6E7383`, which failed 4.5:1 against `background`) |
+| accent | `#685FBF` | darkened from the dark-theme accent to hold contrast on white (ADR-008: rebased on the brighter `#8B7FFF`; still >=4.97:1 against both surfaces) |
 | border | `#E4E7ED` | |
-| success | `#16A34A` | |
+| success | `#107A37` | ADR-007: darkened from `#16A34A`, which failed 4.5:1 against both surfaces |
 | warning | `#B45309` | |
 | danger | `#DC2626` | |
 
-Exact values are a starting point for Phase 4 (`frontend-design`); adjust freely if
-implementation reveals a contrast or legibility issue, and record the change here.
+Exact values were a starting point for Phase 4 (`frontend-design`); adjusted per
+ADR-007 after computing WCAG contrast ratios revealed failures. All roles above
+now meet 4.5:1 against both `background` and `surface` in their theme, except
+where a role is documented as large-text/UI-only.
+
+### Label palette (ADR-008)
+
+New labels cycle through this fixed palette (`src/lib/board-constants.ts`
+`LABEL_COLORS`) rather than reusing one color for every label — the source of
+a populated board's color, not the app chrome. Each swatch is verified
+>=4.5:1 against `#12141A` text, so chips use that one dark text color in
+both themes rather than a per-swatch light/dark choice.
+
+| Name | Value |
+|---|---|
+| indigo | `#8B7FFF` |
+| coral | `#FF9466` |
+| teal | `#2DD4BF` |
+| pink | `#F472B6` |
+| amber | `#FBBF24` |
+| green | `#4ADE80` |
+| sky | `#38BDF8` |
+| violet | `#C084FC` |
 
 ## Typography
 

@@ -162,7 +162,7 @@ Inside a project, a user has a working Kanban board: four columns, cards with ti
 
 ### Phase 4 — Visual design pass
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** AUTONOMOUS
 
@@ -184,9 +184,9 @@ The app matches the confirmed Deep Ink visual direction (dark-first, with a ligh
 
 **Success criteria**
 
-- [ ] Every screen built in Phases 1–3 renders using `docs/DESIGN.md` tokens in both themes with no unstyled/default-browser elements.
-- [ ] Contrast floor verified (4.5:1 body text, 3:1 large text) in both themes.
-- [ ] `bash scripts/validate.sh` passes.
+- [x] Every screen built in Phases 1–3 renders using `docs/DESIGN.md` tokens in both themes with no unstyled/default-browser elements. (Manually verified 2026-09-08 in both themes via the new toggle: home, project switcher dropdown, board, card modal, empty/loading/error states.)
+- [x] Contrast floor verified (4.5:1 body text, 3:1 large text) in both themes. (Computed WCAG ratios for every token pair before building on them; found and fixed 3 real failures in the intake-time palette — see ADR-007. Re-verified after ADR-008's livelier accent + label palette.)
+- [x] `bash scripts/validate.sh` passes. (Verified 2026-09-08: 4/4 checks passed, 92 tests.)
 
 **Documents to update on completion**
 

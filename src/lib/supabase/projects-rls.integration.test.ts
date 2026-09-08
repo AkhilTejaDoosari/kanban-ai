@@ -70,4 +70,27 @@ describe.skipIf(!configured)("projects RLS isolation", () => {
 
     expect(updated).toEqual([]);
   });
+
+  it("blocks user B from deleting user A's project", async () => {
+    const asA = clientFor(userAToken!);
+    const asB = clientFor(userBToken!);
+
+    const { data: created } = await asA
+      .from("projects")
+      .insert({ name: "User A's project for delete RLS" })
+      .select()
+      .single();
+
+    // deleteProject() (src/lib/supabase/projects.ts) filters only by id, no
+    // app-level owner_user_id check -- this proves RLS alone (ADR-003) is
+    // sufficient: the DELETE policy filters the row out before B's request
+    // ever matches it, so B's delete is a silent no-op, not an error.
+    await asB.from("projects").delete().eq("id", created!.id);
+
+    const { data: stillThere } = await asA
+      .from("projects")
+      .select()
+      .eq("id", created!.id);
+    expect(stillThere).toHaveLength(1);
+  });
 });

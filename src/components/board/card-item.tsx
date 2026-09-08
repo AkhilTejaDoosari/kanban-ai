@@ -44,7 +44,7 @@ export function CardItem({
       type="button"
       onClick={() => onOpen(card.id)}
       data-dragging={isDragging}
-      className={`w-full rounded border border-border border-l-4 ${PRIORITY_BORDER[card.priority]} bg-surface p-3 text-left text-sm`}
+      className={`w-full rounded-lg border border-border border-l-4 ${PRIORITY_BORDER[card.priority]} bg-surface p-3 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent`}
     >
       <p className="font-medium text-text-primary">{card.title}</p>
       {card.description && (

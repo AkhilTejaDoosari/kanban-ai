@@ -37,8 +37,8 @@ export default async function ProjectPage({
 
   return (
     <div>
-      <div className="mx-auto max-w-5xl px-4 pt-8">
-        <h1 className="text-xl font-semibold">{project.name}</h1>
+      <div className="px-4 pt-6">
+        <h1 className="text-xl font-semibold text-text-primary">{project.name}</h1>
       </div>
       <Board projectId={id} initialCards={cardsWithLabels} initialLabels={labels} />
     </div>

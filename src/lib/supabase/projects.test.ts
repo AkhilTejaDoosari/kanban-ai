@@ -5,7 +5,7 @@ vi.mock("./server", () => ({
   createServerSupabaseClient: () => ({ from }),
 }));
 
-import { getProject, insertProject, listProjects } from "./projects";
+import { deleteProject, getProject, insertProject, listProjects } from "./projects";
 
 beforeEach(() => {
   from.mockReset();
@@ -113,5 +113,26 @@ describe("insertProject", () => {
     from.mockReturnValue({ insert });
 
     await expect(insertProject("x")).rejects.toThrow("Could not create project.");
+  });
+});
+
+describe("deleteProject", () => {
+  it("deletes the project by id", async () => {
+    const eq = vi.fn().mockResolvedValue({ error: null });
+    const del = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValue({ delete: del });
+
+    await deleteProject("1");
+
+    expect(from).toHaveBeenCalledWith("projects");
+    expect(eq).toHaveBeenCalledWith("id", "1");
+  });
+
+  it("throws a generic error on failure", async () => {
+    const eq = vi.fn().mockResolvedValue({ error: { message: "boom" } });
+    const del = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValue({ delete: del });
+
+    await expect(deleteProject("1")).rejects.toThrow("Could not delete project.");
   });
 });
