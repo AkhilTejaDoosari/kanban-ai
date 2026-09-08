@@ -1,11 +1,11 @@
 import type { Page } from "@playwright/test";
 
-/** Creates a project from the home page and navigates into its board. */
+/** Creates a project from the home page. createProjectAction redirects straight into its board. */
 export async function createProjectAndOpen(page: Page, name: string) {
   await page.goto("/");
   await page.getByPlaceholder("New project name").fill(name);
   await page.getByRole("button", { name: "Create project" }).click();
-  await page.getByRole("link", { name: name }).click();
+  await page.waitForURL(/\/projects\//);
 }
 
 /** Deletes a project by name from the home page. Safe to call even if already gone. */

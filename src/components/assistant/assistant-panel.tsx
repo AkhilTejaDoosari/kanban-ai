@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { askAssistantAction } from "@/app/actions/assistant";
 import {
   createCardAction,
@@ -18,6 +19,7 @@ type Message =
   | { kind: "assistant"; text: string; proposals: Proposal[]; decided: boolean };
 
 export function AssistantPanel({ projectId, columnOrder }: { projectId: string; columnOrder?: Record<Column, string[]> }) {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
@@ -64,6 +66,10 @@ export function AssistantPanel({ projectId, columnOrder }: { projectId: string; 
       await createLabelAction({ projectId, name: proposal.name, color: "#8B7FFF" });
     }
     setMessages((current) => current.map((m, i) => (i === index ? { ...m, decided: true } : m)));
+    // The board is a sibling component with its own local state -- it won't
+    // see this mutation on its own. Refresh so the Server Component re-runs
+    // and hands it fresh cards (Board resyncs from props, see board.tsx).
+    router.refresh();
   }
 
   function handleReject(index: number) {

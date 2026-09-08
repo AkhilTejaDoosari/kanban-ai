@@ -24,15 +24,25 @@ setup("authenticate and save state to storage", async ({ page }) => {
     return;
   }
 
-  // Sign in using the emailAddress parameter: creates a server-side token via
-  // the Backend API and bypasses all verification steps, including the real
-  // Google OAuth consent screen the app uses in production (ADR-010).
-  await page.goto("/");
+  // Every real page in this app calls `auth.protect()`, which redirects an
+  // unauthenticated visitor server-side to Clerk's hosted Account Portal
+  // before any Clerk JS ever loads on localhost — so clerk.signIn() has no
+  // same-origin `window.Clerk` to set a session on. A path with no matching
+  // route renders the root layout (which mounts ClerkProvider unconditionally
+  // in src/app/layout.tsx) without that redirect, giving Clerk JS a chance to
+  // load on localhost first.
+  await page.goto("/__e2e_unauthenticated_warmup");
   await clerk.signIn({
     page,
     emailAddress: process.env.E2E_CLERK_USER_EMAIL,
   });
-  await page.goto("/");
+  // clerk.signIn() leaves a client-side navigation in flight on this page;
+  // racing it with our own goto('/') throws ERR_ABORTED, so wait for things
+  // to settle and retry once.
+  await page.waitForLoadState("networkidle").catch(() => {});
+  await page
+    .goto("/", { waitUntil: "domcontentloaded" })
+    .catch(() => page.goto("/", { waitUntil: "domcontentloaded" }));
   await page.waitForSelector("h1:has-text('Projects')");
 
   await page.context().storageState({ path: authFile });

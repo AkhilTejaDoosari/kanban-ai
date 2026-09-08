@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const {
@@ -53,6 +53,25 @@ describe("Board", () => {
     expect(screen.getByText(/in progress/i)).toBeInTheDocument();
     expect(screen.getByText(/test\/validate/i)).toBeInTheDocument();
     expect(screen.getByText(/^done$/i)).toBeInTheDocument();
+  });
+
+  it("resyncs its displayed cards when initialCards changes (e.g. after router.refresh() following an external mutation like an AI-assistant confirm)", () => {
+    const { rerender } = render(
+      <Board projectId="p1" initialCards={[existingCard]} initialLabels={[]} />,
+    );
+    expect(
+      within(screen.getByRole("group", { name: "To Do column" })).getByText("Existing card"),
+    ).toBeInTheDocument();
+
+    const movedCard: CardWithLabels = { ...existingCard, column_key: "done" };
+    rerender(<Board projectId="p1" initialCards={[movedCard]} initialLabels={[]} />);
+
+    expect(
+      within(screen.getByRole("group", { name: "Done column" })).getByText("Existing card"),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("group", { name: "To Do column" })).queryByText("Existing card"),
+    ).not.toBeInTheDocument();
   });
 
   it("creates a card via the add-card modal and shows it without a reload", async () => {

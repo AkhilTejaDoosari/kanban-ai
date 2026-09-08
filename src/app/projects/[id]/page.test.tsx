@@ -14,7 +14,7 @@ const { protect, notFound, getProject, listCards, listLabels, listCardLabelsForP
   }));
 
 vi.mock("@clerk/nextjs/server", () => ({ auth: { protect } }));
-vi.mock("next/navigation", () => ({ notFound }));
+vi.mock("next/navigation", () => ({ notFound, useRouter: () => ({ refresh: vi.fn() }) }));
 vi.mock("@/lib/supabase/projects", () => ({ getProject }));
 vi.mock("@/lib/supabase/cards", async () => {
   const actual = await vi.importActual<typeof import("@/lib/supabase/cards")>(

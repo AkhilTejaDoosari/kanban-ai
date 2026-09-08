@@ -44,6 +44,24 @@ export function Board({
   const [modal, setModal] = useState<ModalState>(null);
   const previous = useRef(items);
 
+  // initialCards/initialLabels only change when a parent Server Component
+  // re-renders with fresh data (e.g. router.refresh() after the AI assistant
+  // panel confirms a proposal) -- our own actions below update `items`
+  // locally instead, so this never fights the optimistic updates. Adjusting
+  // state during render (React's documented pattern for this) instead of an
+  // effect avoids an extra render pass.
+  const [prevInitialCards, setPrevInitialCards] = useState(initialCards);
+  if (initialCards !== prevInitialCards) {
+    setPrevInitialCards(initialCards);
+    setItems(groupByColumn(initialCards));
+  }
+
+  const [prevInitialLabels, setPrevInitialLabels] = useState(initialLabels);
+  if (initialLabels !== prevInitialLabels) {
+    setPrevInitialLabels(initialLabels);
+    setLabels(initialLabels);
+  }
+
   function closeModal() {
     setModal(null);
   }
