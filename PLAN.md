@@ -52,7 +52,7 @@ An agent may not change a phase's mode; see `AGENTS.md` §10.
 
 ### Phase 1 — Foundation: scaffold, auth, data layer
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** GATED
 
@@ -78,9 +78,9 @@ A signed-in user (via Clerk, Google OAuth) hits an empty but real Next.js app ba
 
 **Success criteria**
 
-- [ ] A user can sign in with Google via Clerk and reach the app shell.
-- [ ] A second Supabase test user cannot read or write a row owned by the first user (verified by a test that attempts both a cross-user `SELECT` and a cross-user `INSERT`/`UPDATE`, and expects both to fail).
-- [ ] `bash scripts/validate.sh` runs lint, typecheck, test, and build and all configured checks pass.
+- [x] A user can sign in with Google via Clerk and reach the app shell. (Manually verified 2026-09-08.)
+- [x] A second Supabase test user cannot read or write a row owned by the first user (verified by a test that attempts both a cross-user `SELECT` and a cross-user `INSERT`/`UPDATE`, and expects both to fail). (Verified 2026-09-08: `src/lib/supabase/projects-rls.integration.test.ts` run against the real `kanban-ai` Supabase project with two real Clerk session JWTs minted via the Clerk Backend SDK — 3/3 tests passed.)
+- [x] `bash scripts/validate.sh` runs lint, typecheck, test, and build and all configured checks pass. (Verified 2026-09-08: 4/4 checks passed.)
 
 **Documents to update on completion**
 
@@ -90,7 +90,7 @@ A signed-in user (via Clerk, Google OAuth) hits an empty but real Next.js app ba
 
 ### Phase 2 — Projects and home page
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** GATED
 
@@ -114,9 +114,9 @@ A signed-in user can create, see, and switch between multiple isolated projects.
 
 **Success criteria**
 
-- [ ] Creating a project as user A makes it appear on user A's home page and not on user B's.
-- [ ] Navigating to another user's project id directly (URL manipulation) does not expose that project's data.
-- [ ] `bash scripts/validate.sh` passes.
+- [x] Creating a project as user A makes it appear on user A's home page and not on user B's. (Manually verified 2026-09-08 with two real Google accounts.)
+- [x] Navigating to another user's project id directly (URL manipulation) does not expose that project's data. (`/projects/[id]` calls `notFound()` when `getProject()` returns null, which RLS guarantees for a non-owned id — same mechanism proven by Phase 1's integration test; also manually verified.)
+- [x] `bash scripts/validate.sh` passes. (Verified 2026-09-08: 4/4 checks passed, 20 tests.)
 
 **Documents to update on completion**
 
@@ -126,7 +126,7 @@ A signed-in user can create, see, and switch between multiple isolated projects.
 
 ### Phase 3 — Kanban board core
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** GATED
 
@@ -139,7 +139,7 @@ Inside a project, a user has a working Kanban board: four columns, cards with ti
 **Deliverables**
 
 - `cards`, `labels`, `card_labels` tables with RLS policies (read and write) scoped through `project_id` ownership.
-- Board UI: To Do / In Progress / Done / Shipped columns using `@dnd-kit/react`, cross-container sortable drag-and-drop with position persisted on drop, optimistic UI with rollback on server rejection.
+- Board UI: To Do / In Progress / Test/Validate / Done columns using `@dnd-kit/react`, cross-container sortable drag-and-drop with position persisted on drop, optimistic UI with rollback on server rejection.
 - Card create/edit/delete UI covering all v1 fields (title, description, due date, priority, labels).
 
 **Capabilities needed**
@@ -150,9 +150,9 @@ Inside a project, a user has a working Kanban board: four columns, cards with ti
 
 **Success criteria**
 
-- [ ] A card can be created, edited, deleted, and dragged between all four columns, with the new position persisted after a page reload.
-- [ ] A user cannot read or write another user's project's cards/labels via direct API calls (tested, not just assumed from RLS).
-- [ ] `bash scripts/validate.sh` passes.
+- [x] A card can be created, edited, deleted, and dragged between all four columns, with the new position persisted after a page reload. (Manually verified 2026-09-08, including a real bug found and fixed in review: a stale `column_key` after optimistic cross-column moves was causing drags to revert on reload.)
+- [x] A user cannot read or write another user's project's cards/labels via direct API calls (tested, not just assumed from RLS). (Verified 2026-09-08: `src/lib/supabase/cards-labels-rls.integration.test.ts` run against the real `kanban-ai` Supabase project with two real Clerk session JWTs — 5/5 tests passed, covering cross-user read/insert/update on `cards`, read on `labels`, and insert on `card_labels`.)
+- [x] `bash scripts/validate.sh` passes. (Verified 2026-09-08: 4/4 checks passed, 70 tests.)
 
 **Documents to update on completion**
 
@@ -162,7 +162,7 @@ Inside a project, a user has a working Kanban board: four columns, cards with ti
 
 ### Phase 4 — Visual design pass
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** AUTONOMOUS
 
@@ -184,9 +184,9 @@ The app matches the confirmed Deep Ink visual direction (dark-first, with a ligh
 
 **Success criteria**
 
-- [ ] Every screen built in Phases 1–3 renders using `docs/DESIGN.md` tokens in both themes with no unstyled/default-browser elements.
-- [ ] Contrast floor verified (4.5:1 body text, 3:1 large text) in both themes.
-- [ ] `bash scripts/validate.sh` passes.
+- [x] Every screen built in Phases 1–3 renders using `docs/DESIGN.md` tokens in both themes with no unstyled/default-browser elements. (Manually verified 2026-09-08 in both themes via the new toggle: home, project switcher dropdown, board, card modal, empty/loading/error states.)
+- [x] Contrast floor verified (4.5:1 body text, 3:1 large text) in both themes. (Computed WCAG ratios for every token pair before building on them; found and fixed 3 real failures in the intake-time palette — see ADR-007. Re-verified after ADR-008's livelier accent + label palette.)
+- [x] `bash scripts/validate.sh` passes. (Verified 2026-09-08: 4/4 checks passed, 92 tests.)
 
 **Documents to update on completion**
 
@@ -196,7 +196,7 @@ The app matches the confirmed Deep Ink visual direction (dark-first, with a ligh
 
 ### Phase 5 — AI assistant (propose / confirm)
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** GATED
 
@@ -220,10 +220,10 @@ A project-scoped AI chat panel that can propose board changes (create/move/updat
 
 **Success criteria**
 
-- [ ] Asking the assistant to move/create/edit a card produces a preview, not an immediate change.
-- [ ] Confirming the preview performs exactly the previewed mutation; rejecting performs none.
-- [ ] The assistant cannot be prompted into affecting a project it wasn't scoped to (tested).
-- [ ] `bash scripts/validate.sh` passes.
+- [x] Asking the assistant to move/create/edit a card produces a preview, not an immediate change. (Verified 2026-09-08: `src/components/assistant/assistant-panel.test.tsx` — "shows a preview with Confirm/Reject instead of changing the board".)
+- [x] Confirming the preview performs exactly the previewed mutation; rejecting performs none. (Verified 2026-09-08: `assistant-panel.test.tsx` — "confirm executes the previewed mutation; reject executes nothing" and "reject performs no mutation".)
+- [x] The assistant cannot be prompted into affecting a project it wasn't scoped to (tested). (Verified 2026-09-08: `src/app/actions/assistant.test.ts` — "drops tool calls referencing cards outside the project" and "ignores a tool call smuggled in for another project"; scope enforced via `validateProposalInput` in `src/lib/assistant/tools.ts`.)
+- [x] `bash scripts/validate.sh` passes. (Verified 2026-09-08: 4/4 checks passed — lint, typecheck, 103 tests passed (11 skipped), build.)
 
 **Documents to update on completion**
 
@@ -233,7 +233,7 @@ A project-scoped AI chat panel that can propose board changes (create/move/updat
 
 ### Phase 6 — Testing and hardening
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** AUTONOMOUS
 
@@ -256,10 +256,13 @@ The core flows are covered by automated tests, and error handling matches the AG
 
 **Success criteria**
 
-- [ ] `npm test` and the Playwright suite both pass in CI-equivalent local run.
-- [ ] No user-facing error message in the audited surfaces exposes a stack trace, raw query, or internal file path.
-- [ ] `bash scripts/validate.sh` passes with all four checks configured and green.
+- [x] `npm test` and the Playwright suite both pass in CI-equivalent local run. (Verified 2026-09-08: `npm test` — 105 tests passed, 11 skipped (gated integration tests), 0 failed. `npm run test:e2e` — 6/6 passed twice in a row against the real dev server, real Supabase project, real Clerk sign-in (Testing Token bypass — no real Google OAuth), and real Groq API: sign-in reaches the projects page, create-project opens a board, dragging a card between columns persists after reload, and the assistant proposes a move as a preview that is confirmed into exactly that move. Each E2E spec creates and deletes its own project, so the real account this ran against was left clean.)
+- [x] No user-facing error message in the audited surfaces exposes a stack trace, raw query, or internal file path. (Audited 2026-09-08: every `throw new Error(...)` in `src/lib/supabase/*.ts` and `src/app/actions/*.ts` uses a fixed generic message — "Could not load cards.", "Could not get a suggestion.", etc. — never the underlying Supabase/Groq error. Both `src/app/error.tsx` and `src/app/projects/[id]/error.tsx` render fixed copy and never read `error.message`. No changes were needed.)
+- [x] `bash scripts/validate.sh` passes with all four checks configured and green. (Verified 2026-09-08: lint, typecheck, test, build all PASS — "VALIDATION PASSED (4 checks)".)
+
+Building and running the real E2E suite (not just writing it) surfaced a genuine bug no mocked unit test could see: confirming an AI-proposed move wrote to the database correctly but never updated the on-screen board (`Board` and `AssistantPanel` are sibling components with independent state and no sync path). Fixed by having the assistant panel call `router.refresh()` after a confirmed mutation and having `Board` resync its state from props when they change — see the `fix:` commit on this phase's branch for detail, and `AGENTS.md` §5/§8 on why this is exactly what Phase 6 is for.
 
 **Documents to update on completion**
 
-- `README.md` (how to run the test suites)
+- `README.md` (how to run the test suites) — done
+- `docs/DECISIONS.md` — ADR-010 (E2E testing strategy: Clerk Testing Token bypass, real Groq calls, kept out of `validate.sh`)
