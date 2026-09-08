@@ -4,6 +4,7 @@ import { getProject } from "@/lib/supabase/projects";
 import { listCards } from "@/lib/supabase/cards";
 import { listCardLabelsForProject, listLabels } from "@/lib/supabase/labels";
 import { Board } from "@/components/board/board";
+import { AssistantPanel } from "@/components/assistant/assistant-panel";
 import type { CardWithLabels } from "@/components/board/types";
 
 export default async function ProjectPage({
@@ -36,11 +37,14 @@ export default async function ProjectPage({
   }));
 
   return (
-    <div>
-      <div className="px-4 pt-6">
-        <h1 className="text-xl font-semibold text-text-primary">{project.name}</h1>
+    <div className="flex min-h-[calc(100vh-3.5rem)]">
+      <div className="min-w-0 flex-1">
+        <div className="px-4 pt-6">
+          <h1 className="text-xl font-semibold text-text-primary">{project.name}</h1>
+        </div>
+        <Board projectId={id} initialCards={cardsWithLabels} initialLabels={labels} />
       </div>
-      <Board projectId={id} initialCards={cardsWithLabels} initialLabels={labels} />
+      <AssistantPanel projectId={id} />
     </div>
   );
 }
