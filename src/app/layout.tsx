@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider, Show, SignInButton, UserButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import { ProjectSwitcherContainer } from "@/components/project-switcher-container";
 import { ThemeToggle } from "@/components/theme-toggle";
 import "./globals.css";
@@ -42,7 +43,13 @@ export default function RootLayout({
         <ClerkProvider>
           <header className="flex items-center justify-between border-b border-border px-6 h-14">
             <div className="flex items-center gap-6">
-              <span className="text-lg font-semibold tracking-tight">Kanban AI</span>
+              <Link
+                href="/"
+                aria-label="Home"
+                className="rounded-md text-lg font-semibold tracking-tight text-text-primary hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                Kanban AI
+              </Link>
               <Show when="signed-in">
                 <ProjectSwitcherContainer />
               </Show>
