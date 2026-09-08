@@ -32,6 +32,8 @@ export function BoardColumn({
   return (
     <div
       ref={ref}
+      role="group"
+      aria-label={`${title} column`}
       className="flex min-h-40 flex-col gap-2 rounded-xl border border-border bg-background p-3"
     >
       <div className="flex items-center justify-between">

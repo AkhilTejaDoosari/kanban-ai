@@ -39,6 +39,23 @@ describe("BoardColumn", () => {
     expect(screen.getByText("Second")).toBeInTheDocument();
   });
 
+  it("exposes itself as a labeled group so it can be targeted independently of its heading text", () => {
+    render(
+      <DragDropProvider>
+        <BoardColumn
+          id="done"
+          title="Done"
+          cards={[]}
+          labels={[]}
+          onOpenCard={vi.fn()}
+          onAddCard={vi.fn()}
+        />
+      </DragDropProvider>,
+    );
+
+    expect(screen.getByRole("group", { name: "Done column" })).toBeInTheDocument();
+  });
+
   it("shows an empty state when the column has no cards", () => {
     render(
       <DragDropProvider>
