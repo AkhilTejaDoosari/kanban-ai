@@ -12,9 +12,9 @@ AI confirm-before-execute) were made.
 
 ## Status
 
-Phases 1–5 are complete: auth + data layer, projects, the Kanban board, the visual
-design pass, and the AI assistant. Phase 6 (testing and hardening) is in progress.
-See `PLAN.md` for details and success-criteria evidence.
+All six phases in `PLAN.md` are complete: auth + data layer, projects, the Kanban
+board, the visual design pass, the AI assistant, and testing/hardening. See
+`PLAN.md` for per-phase success-criteria evidence.
 
 ## Stack
 
@@ -45,6 +45,13 @@ commands and is the only place they appear:
 ```bash
 bash scripts/validate.sh
 ```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs this same command on every pull
+request and on push to `main` — with **no Clerk, Supabase, Groq, or E2E secrets
+configured**. `scripts/validate.sh`'s lint/typecheck/build steps don't touch any
+external service, and the tests gated on `SUPABASE_TEST_*`/`E2E_CLERK_USER_EMAIL`
+(see Testing below) skip themselves with a clear message when those are unset,
+which is always the case in CI.
 
 ## Testing
 
