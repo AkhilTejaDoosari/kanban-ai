@@ -338,3 +338,43 @@ these eight were. `docs/DESIGN.md`'s palette tables and label-palette section
 were updated in the same commit.
 
 ---
+
+## ADR-009 — Assistant history session-only; model openai/gpt-oss-120b via Groq
+
+**Date:** 2026-09-08
+**Status:** accepted
+
+**Context**
+
+Phase 5 required a planning-time decision: persist per-project conversation
+history in Postgres or keep it session-only. A history table needs a schema,
+RLS policies (read + write per ADR-003), and retention semantics — significant
+surface for a v1 assistant whose core promise is propose/confirm, not memory.
+
+The phase was originally planned against the Anthropic API. During planning, the
+project owner directed a switch to Groq (free tier) over Anthropic (paid), with
+model `openai/gpt-oss-120b` (the model Groq's own tool-use docs use, verified via
+context7 at build time), key `GROQ_API_KEY` (already in `.env.example`), SDK
+`groq-sdk`. Earlier ADRs (notably ADR-004) name Anthropic; this entry records the
+as-built provider. `docs/ARCHITECTURE.md` was corrected to Groq in the same
+commit; append-only prior entries are left as written.
+
+**Decision**
+
+Conversation history is React state inside the assistant panel — session-only,
+cleared on navigation/reload. Model: `openai/gpt-oss-120b` via Groq (`groq-sdk`,
+`GROQ_API_KEY`), verified via context7 at build time.
+
+**Alternatives considered**
+
+- `assistant_messages` table scoped by `project_id` with full RLS — rejected
+  for v1: doubles the phase's schema/policy/test surface for a feature no
+  success criterion requires. Revisit if users ask for persistent threads.
+
+**Consequences**
+
+Reloading the project page starts a fresh conversation. A future persistence
+phase must add the table, RLS read+write policies, and cross-user tests per
+ADR-003 before storing anything.
+
+---

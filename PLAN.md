@@ -196,7 +196,7 @@ The app matches the confirmed Deep Ink visual direction (dark-first, with a ligh
 
 ### Phase 5 — AI assistant (propose / confirm)
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** GATED
 

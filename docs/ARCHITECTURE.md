@@ -12,7 +12,7 @@ auth" integration lets the server-side Supabase client carry the Clerk session, 
 Postgres Row Level Security policies can authorize every query directly against the
 signed-in user's Clerk id — isolation between users and between a user's own
 projects is enforced by the database, not by application-level filtering alone. The
-AI assistant is a chat panel that calls the Anthropic API with a tool-use loop; tool
+AI assistant is a chat panel that calls the Groq API (`openai/gpt-oss-120b`, via `groq-sdk`) with a tool-use loop; tool
 calls it wants to make are previewed to the user and only executed, through the same
 RLS-backed mutation paths as manual edits, after explicit confirmation.
 
@@ -24,7 +24,7 @@ RLS-backed mutation paths as manual edits, after explicit confirmation.
 | Next.js app (Server Components + Server Actions) | Renders UI, enforces `await auth()`/`auth.protect()` on every route, performs mutations via `"use server"` actions (Phase 2 established this over Route Handlers — colocated, form-bindable, same RLS-backed client) | Clerk, Supabase |
 | Supabase Postgres | Stores projects/cards/labels, enforces RLS | Next.js app (server-side client per request, carrying the Clerk session) |
 | Board UI (`@dnd-kit/react`) | Client-side drag-and-drop, optimistic reordering | Server Actions (persist position) |
-| AI assistant panel | Project-scoped chat; proposes tool calls, never executes without confirm | Anthropic API (chat + tool-use), Server Actions (execute confirmed action) |
+| AI assistant panel | Project-scoped chat; proposes tool calls, never executes without confirm | Groq API (chat + tool-use), Server Actions (execute confirmed action) |
 
 ## Data model
 
@@ -46,7 +46,7 @@ just by the UI only ever asking for the "right" `project_id`.
 |---|---|---|
 | Clerk | Authentication, Google OAuth, session/JWT issuance | Unauthenticated requests are redirected to sign-in; no route renders without a valid session |
 | Supabase (Postgres) | All persisted data, RLS enforcement | A failed query surfaces a generic "couldn't save/load that" to the user; no query text or stack trace is shown |
-| Anthropic API | AI assistant chat + tool-use | A failed AI call degrades the assistant panel to an error state; the board itself is unaffected since AI actions never write until confirmed |
+| Groq API | AI assistant chat + tool-use | A failed AI call degrades the assistant panel to an error state; the board itself is unaffected since AI actions never write until confirmed |
 
 ## Boundaries
 
