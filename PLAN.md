@@ -90,7 +90,7 @@ A signed-in user (via Clerk, Google OAuth) hits an empty but real Next.js app ba
 
 ### Phase 2 — Projects and home page
 
-**Status:** not started
+**Status:** complete
 
 **Execution mode:** GATED
 
@@ -114,9 +114,9 @@ A signed-in user can create, see, and switch between multiple isolated projects.
 
 **Success criteria**
 
-- [ ] Creating a project as user A makes it appear on user A's home page and not on user B's.
-- [ ] Navigating to another user's project id directly (URL manipulation) does not expose that project's data.
-- [ ] `bash scripts/validate.sh` passes.
+- [x] Creating a project as user A makes it appear on user A's home page and not on user B's. (Manually verified 2026-09-08 with two real Google accounts.)
+- [x] Navigating to another user's project id directly (URL manipulation) does not expose that project's data. (`/projects/[id]` calls `notFound()` when `getProject()` returns null, which RLS guarantees for a non-owned id — same mechanism proven by Phase 1's integration test; also manually verified.)
+- [x] `bash scripts/validate.sh` passes. (Verified 2026-09-08: 4/4 checks passed, 20 tests.)
 
 **Documents to update on completion**
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider, Show, SignInButton, UserButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ProjectSwitcherContainer } from "@/components/project-switcher-container";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,6 +31,9 @@ export default function RootLayout({
         <ClerkProvider>
           <header className="flex items-center justify-between border-b border-border px-6 h-14">
             <span className="text-sm font-medium tracking-wide">Kanban AI</span>
+            <Show when="signed-in">
+              <ProjectSwitcherContainer />
+            </Show>
             <Show when="signed-out">
               <SignInButton />
             </Show>
