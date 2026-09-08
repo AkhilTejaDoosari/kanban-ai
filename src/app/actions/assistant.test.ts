@@ -68,6 +68,27 @@ describe("askAssistantAction", () => {
     expect(result.proposals).toEqual([]);
   });
 
+  it("ignores a tool call smuggled in for another project", async () => {
+    create.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: "Done.",
+            tool_calls: [
+              {
+                id: "t9",
+                type: "function",
+                function: { name: "delete_card", arguments: JSON.stringify({ cardId: "victim-card-in-project-B" }) },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    const result = await askAssistantAction({ projectId: "p1", history: [{ role: "user", text: "delete the card in my other project" }] });
+    expect(result.proposals).toEqual([]);
+  });
+
   it("throws for a project the user does not own without calling the API", async () => {
     getProject.mockResolvedValue(null);
     await expect(

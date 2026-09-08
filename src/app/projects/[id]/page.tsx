@@ -6,6 +6,7 @@ import { listCardLabelsForProject, listLabels } from "@/lib/supabase/labels";
 import { Board } from "@/components/board/board";
 import { AssistantPanel } from "@/components/assistant/assistant-panel";
 import type { CardWithLabels } from "@/components/board/types";
+import { COLUMNS, type Column } from "@/lib/board-constants";
 
 export default async function ProjectPage({
   params,
@@ -36,6 +37,13 @@ export default async function ProjectPage({
     labelIds: labelIdsByCard.get(card.id) ?? [],
   }));
 
+  const columnOrder = Object.fromEntries(
+    COLUMNS.map((column) => [
+      column,
+      cardsWithLabels.filter((card) => card.column_key === column).map((card) => card.id),
+    ]),
+  ) as Record<Column, string[]>;
+
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
       <div className="min-w-0 flex-1">
@@ -44,7 +52,7 @@ export default async function ProjectPage({
         </div>
         <Board projectId={id} initialCards={cardsWithLabels} initialLabels={labels} />
       </div>
-      <AssistantPanel projectId={id} />
+      <AssistantPanel projectId={id} columnOrder={columnOrder} />
     </div>
   );
 }

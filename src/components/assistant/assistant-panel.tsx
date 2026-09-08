@@ -11,12 +11,13 @@ import {
   updateCardAction,
 } from "@/app/actions/board";
 import { formatProposalPreview, type Proposal } from "@/lib/assistant/tools";
+import type { Column } from "@/lib/board-constants";
 
 type Message =
   | { kind: "user"; text: string }
   | { kind: "assistant"; text: string; proposals: Proposal[]; decided: boolean };
 
-export function AssistantPanel({ projectId }: { projectId: string }) {
+export function AssistantPanel({ projectId, columnOrder }: { projectId: string; columnOrder?: Record<Column, string[]> }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
@@ -50,7 +51,9 @@ export function AssistantPanel({ projectId }: { projectId: string }) {
   async function handleConfirm(index: number, proposal: Proposal) {
     // Confirm path reuses the exact manual-edit actions — same RLS, no bypass.
     if (proposal.type === "move_card") {
-      await moveCardAction({ cardId: proposal.cardId, projectId, toColumn: proposal.toColumn, orderedIds: [proposal.cardId] });
+      const live = columnOrder?.[proposal.toColumn] ?? [];
+      const orderedIds = [...live.filter((id) => id !== proposal.cardId), proposal.cardId];
+      await moveCardAction({ cardId: proposal.cardId, projectId, toColumn: proposal.toColumn, orderedIds });
     } else if (proposal.type === "create_card") {
       await createCardAction({ projectId, column: proposal.column, title: proposal.title, position: 0, description: proposal.description });
     } else if (proposal.type === "update_card") {
